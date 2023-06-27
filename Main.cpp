@@ -1,4 +1,5 @@
 #include <GL/freeglut.h>
+#include "common.h"
 
 int refreshRate = 300;
 
@@ -11,6 +12,15 @@ void display3D();
 void dragFloor();
 void dragPlayer();
 
+void spinDisplayIzq();
+void spinDisplayDer();
+
+void keyDown(int key, int, int);
+void keyUp(int key, int, int);
+
+float posx = 0.0f;
+bool isKey = false, isFirst = true;
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
@@ -21,6 +31,9 @@ int main(int argc, char** argv)
 
     glutDisplayFunc(display3D);
     glutReshapeFunc(reshape);
+
+    glutSpecialFunc(keyDown);
+    glutSpecialUpFunc(keyUp);
 
     glutTimerFunc(0, timer, 0);
     initGL();
@@ -55,6 +68,7 @@ void display3D() {
     gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
 
     glPushMatrix();
+    glTranslatef(posx, 0.0f, 0.0f);
     dragPlayer();
     glPopMatrix();
 
@@ -64,4 +78,47 @@ void display3D() {
 
 
     glutSwapBuffers();
+}
+
+
+void spinDisplayIzq() {
+    if (isKey)
+        posx -= 0.005f;
+    glutPostRedisplay();
+}
+
+void spinDisplayDer() {
+    if (isKey)
+        posx += 0.005f;
+    glutPostRedisplay();
+}
+
+void keyDown(int key, int, int) {
+    switch (key) {
+    case GLUT_KEY_LEFT:
+        isKey = true;
+        glutIdleFunc(spinDisplayIzq);
+        break;
+    case GLUT_KEY_RIGHT:
+        isKey = true;
+        glutIdleFunc(spinDisplayDer);
+        break;
+    default:
+        break;
+    }
+}
+
+void keyUp(int key, int, int) {
+    switch (key) {
+    case GLUT_KEY_LEFT:
+        isKey = false;
+        glutIdleFunc(NULL);
+        break;
+    case GLUT_KEY_RIGHT:
+        isKey = false;
+        glutIdleFunc(NULL);
+        break;
+    default:
+        break;
+    }
 }
