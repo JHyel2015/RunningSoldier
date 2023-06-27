@@ -10,22 +10,34 @@ void timer(int value);
 void display3D();
 
 void dragFloor();
+
+void dragEnemy();
+
 void dragPlayer();
 
 void spinDisplayIzq();
 void spinDisplayDer();
+void spinDisplayJump();
 
 void keyDown(int key, int, int);
 void keyUp(int key, int, int);
 
+float camX = 0.0f;
+float camY = 0.0f;
+float centerX = 0.0f;
+float centerY = 0.0f;
+float cameraSpeed = 0.005f;
+
 float posx = 0.0f;
-bool isKey = false, isFirst = true;
+float posy = 0.0f;
+float playerVelocity = 0.0f;
+bool isKey = false, isFirst = true, isJumping = false;
 
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
-    glutInitWindowSize(640, 480);
+    glutInitWindowSize(800, 600);
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Ejecricio Transformaciones de la vista");
 
@@ -45,7 +57,7 @@ void reshape(GLint w, GLint h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(100, 1, 1, 100);
+    gluPerspective(100, (float)4/3, 1, 100);
 }
 
 void initGL() {
@@ -65,11 +77,17 @@ void display3D() {
     glLoadIdentity();
 
 
-    gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
+    gluLookAt(camX, camY, 10, centerX, 0, 0, 0, 1, 0);
 
     glPushMatrix();
-    glTranslatef(posx, 0.0f, 0.0f);
+    glTranslatef(posx, posy, 0.0f);
     dragPlayer();
+    glPopMatrix();
+
+
+    glPushMatrix();
+    glTranslatef(5.0f, 0.0f, 0.0f);
+    dragEnemy();
     glPopMatrix();
 
     glPushMatrix();
@@ -78,18 +96,51 @@ void display3D() {
 
 
     glutSwapBuffers();
+    if (isJumping)
+    {
+        posy += playerVelocity;
+        playerVelocity -= 0.25f;
+
+        if (playerVelocity < 0.0f) {
+            posy = 0.0f;
+            playerVelocity = 0.0f;
+            isJumping = false;
+        }
+    }
 }
 
 
 void spinDisplayIzq() {
-    if (isKey)
+    if (isKey) {
         posx -= 0.005f;
+        camX -= cameraSpeed;
+        centerX -= cameraSpeed;
+    }
     glutPostRedisplay();
 }
 
 void spinDisplayDer() {
     if (isKey)
+    {
         posx += 0.005f;
+        camX += cameraSpeed;
+        centerX += cameraSpeed;
+    }
+    glutPostRedisplay();
+}
+
+void spinDisplayJump() {
+    if (isJumping)
+    {
+        posy += playerVelocity;
+        playerVelocity -= 0.01f;
+
+        if (playerVelocity < 0.0f) {
+            posy = 0.0f;
+            playerVelocity = 0.0f;
+            isJumping = false;
+        }
+    }
     glutPostRedisplay();
 }
 
@@ -103,6 +154,12 @@ void keyDown(int key, int, int) {
         isKey = true;
         glutIdleFunc(spinDisplayDer);
         break;
+    case GLUT_KEY_UP:
+        isKey = true;
+        playerVelocity = 1.0f;
+        isJumping = true;
+        //glutIdleFunc(spinDisplayJump);
+        break;
     default:
         break;
     }
@@ -115,6 +172,10 @@ void keyUp(int key, int, int) {
         glutIdleFunc(NULL);
         break;
     case GLUT_KEY_RIGHT:
+        isKey = false;
+        glutIdleFunc(NULL);
+        break;
+    case GLUT_KEY_UP:
         isKey = false;
         glutIdleFunc(NULL);
         break;
