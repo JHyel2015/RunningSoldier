@@ -1,4 +1,5 @@
 #include <GL/freeglut.h>
+#include "common.h"
 
 void dragFloor() {
 
