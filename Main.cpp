@@ -10,15 +10,26 @@ void timer(int value);
 void display3D();
 
 void dragFloor();
+
+void dragEnemy();
+
 void dragPlayer();
 
 void spinDisplayIzq();
 void spinDisplayDer();
+void spinDisplayJump();
 
 void keyDown(int key, int, int);
 void keyUp(int key, int, int);
 
+float camX = 0.0f;
+float camY = 0.0f;
+float centerX = 0.0f;
+float centerY = 0.0f;
+float cameraSpeed = 0.01f;
+
 float posx = 0.0f;
+float posy = 0.0f;
 bool isKey = false, isFirst = true;
 
 int main(int argc, char** argv)
@@ -65,11 +76,17 @@ void display3D() {
     glLoadIdentity();
 
 
-    gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
+    gluLookAt(camX, camY, 10, centerX, 0, 0, 0, 1, 0);
 
     glPushMatrix();
     glTranslatef(posx, 0.0f, 0.0f);
     dragPlayer();
+    glPopMatrix();
+
+
+    glPushMatrix();
+    glTranslatef(5.0f, 0.0f, 0.0f);
+    dragEnemy();
     glPopMatrix();
 
     glPushMatrix();
@@ -82,14 +99,29 @@ void display3D() {
 
 
 void spinDisplayIzq() {
-    if (isKey)
+    if (isKey) {
         posx -= 0.005f;
+        camX -= cameraSpeed;
+        centerX -= cameraSpeed;
+    }
     glutPostRedisplay();
 }
 
 void spinDisplayDer() {
     if (isKey)
+    {
         posx += 0.005f;
+        camX += cameraSpeed;
+        centerX += cameraSpeed;
+    }
+    glutPostRedisplay();
+}
+
+void spinDisplayJump() {
+    if (isKey)
+    {
+        posy += 0.010f;
+    }
     glutPostRedisplay();
 }
 
@@ -102,6 +134,10 @@ void keyDown(int key, int, int) {
     case GLUT_KEY_RIGHT:
         isKey = true;
         glutIdleFunc(spinDisplayDer);
+        break;
+    case GLUT_KEY_UP:
+        isKey = true;
+        glutIdleFunc(spinDisplayJump);
         break;
     default:
         break;
