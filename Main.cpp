@@ -10,10 +10,14 @@ void timer(int value);
 void display3D();
 
 void dragFloor();
+void dragFloors(int cont);
+void dragCloud(int size);
 
 void dragEnemy();
 
 void dragPlayer();
+
+void dragHongo();
 
 void spinDisplayIzq();
 void spinDisplayDer();
@@ -26,12 +30,15 @@ float camX = 0.0f;
 float camY = 0.0f;
 float centerX = 0.0f;
 float centerY = 0.0f;
-float cameraSpeed = 0.005f;
+float cameraSpeed = 0.01f;
 
 float posx = 0.0f;
 float posy = 0.0f;
+float playerSpeed = 0.01f;
 float playerVelocity = 0.0f;
 bool isKey = false, isFirst = true, isJumping = false;
+
+int cont = 10;
 
 int main(int argc, char** argv)
 {
@@ -80,19 +87,24 @@ void display3D() {
     gluLookAt(camX, camY, 10, centerX, 0, 0, 0, 1, 0);
 
     glPushMatrix();
+    glTranslatef(3.5f, 5.0f, 0.0f);
+    dragCloud(5);
+    glPopMatrix();
+
+    glPushMatrix();
     glTranslatef(posx, posy, 0.0f);
     dragPlayer();
     glPopMatrix();
 
+    for (int i = 1; i <= 10; i++)
+    {
+        glPushMatrix();
+        glTranslatef(5.0f * (float) i, 0.0f - (i % 2 ), 0.0f);
+        dragEnemy();
+        glPopMatrix();
+    }
 
-    glPushMatrix();
-    glTranslatef(5.0f, 0.0f, 0.0f);
-    dragEnemy();
-    glPopMatrix();
-
-    glPushMatrix();
-    dragFloor();
-    glPopMatrix();
+    dragFloors(5);
 
 
     glutSwapBuffers();
@@ -112,7 +124,7 @@ void display3D() {
 
 void spinDisplayIzq() {
     if (isKey) {
-        posx -= 0.005f;
+        posx -= playerSpeed;
         camX -= cameraSpeed;
         centerX -= cameraSpeed;
     }
@@ -122,7 +134,7 @@ void spinDisplayIzq() {
 void spinDisplayDer() {
     if (isKey)
     {
-        posx += 0.005f;
+        posx += playerSpeed;
         camX += cameraSpeed;
         centerX += cameraSpeed;
     }
@@ -176,7 +188,6 @@ void keyUp(int key, int, int) {
         glutIdleFunc(NULL);
         break;
     case GLUT_KEY_UP:
-        isKey = false;
         glutIdleFunc(NULL);
         break;
     default:
