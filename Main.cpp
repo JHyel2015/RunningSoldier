@@ -1,5 +1,10 @@
 #include <GL/freeglut.h>
+#include <soil.h>
+#include <iostream>
+#include <string>
 #include "common.h"
+
+using namespace std;
 
 int refreshRate = 300;
 
@@ -15,6 +20,9 @@ void dragCloud(int size);
 
 void dragEnemy();
 
+void loadTexture(GLuint** texture);
+void loadTextures(const char* path, int cont);
+void dragPlayer(GLuint texture);
 void dragPlayer();
 
 void dragHongo();
@@ -35,10 +43,17 @@ float cameraSpeed = 0.01f;
 float posx = 0.0f;
 float posy = 0.0f;
 float playerSpeed = 0.01f;
-float playerVelocity = 0.0f;
 bool isKey = false, isFirst = true, isJumping = false;
 
+float objectX = 0.0f;
+float objectY = 0.0f;
+float objectVelocityY = 0.0f;
+float objectAccelerationY = -0.25f;
+
 int cont = 10;
+
+GLuint textureIDs[5];   // Array of texture IDs
+int currentTexture = 0;
 
 int main(int argc, char** argv)
 {
@@ -48,6 +63,8 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100, 100);
     glutCreateWindow("Ejecricio Transformaciones de la vista");
 
+    // loadTexture(&textureIDs);
+    loadTextures("standing", 5);
     glutDisplayFunc(display3D);
     glutReshapeFunc(reshape);
 
@@ -74,6 +91,25 @@ void initGL() {
 }
 
 void timer(int value) {
+    if (isJumping) {
+        // Apply gravity to the vertical velocity
+        objectVelocityY += objectAccelerationY;
+
+        // Update the object's vertical position based on the velocity
+        objectY += objectVelocityY;
+
+        // Check if the object has landed (e.g., reached the ground level)
+        if (objectY <= 0.0f) {
+            // Reset the position and velocity to simulate a jump
+            objectY = 0.0f;
+            objectVelocityY = 0.0f;
+            isJumping = false;
+        }
+    }
+
+    // Update the current texture index
+    currentTexture = (currentTexture + 1) % 5;
+
     glutPostRedisplay();
     glutTimerFunc(refreshRate, timer, 0);
 }
@@ -87,12 +123,7 @@ void display3D() {
     gluLookAt(camX, camY, 10, centerX, 0, 0, 0, 1, 0);
 
     glPushMatrix();
-    glTranslatef(3.5f, 5.0f, 0.0f);
-    dragCloud(5);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(posx, posy, 0.0f);
+    glTranslatef(posx, objectY, 0.0f);
     dragPlayer();
     glPopMatrix();
 
@@ -104,21 +135,15 @@ void display3D() {
         glPopMatrix();
     }
 
+    glPushMatrix();
+    glTranslatef(3.5f, 5.0f, 0.0f);
+    dragCloud(5);
+    glPopMatrix();
+
     dragFloors(5);
 
 
     glutSwapBuffers();
-    if (isJumping)
-    {
-        posy += playerVelocity;
-        playerVelocity -= 0.25f;
-
-        if (playerVelocity < 0.0f) {
-            posy = 0.0f;
-            playerVelocity = 0.0f;
-            isJumping = false;
-        }
-    }
 }
 
 
@@ -141,21 +166,6 @@ void spinDisplayDer() {
     glutPostRedisplay();
 }
 
-void spinDisplayJump() {
-    if (isJumping)
-    {
-        posy += playerVelocity;
-        playerVelocity -= 0.01f;
-
-        if (playerVelocity < 0.0f) {
-            posy = 0.0f;
-            playerVelocity = 0.0f;
-            isJumping = false;
-        }
-    }
-    glutPostRedisplay();
-}
-
 void keyDown(int key, int, int) {
     switch (key) {
     case GLUT_KEY_LEFT:
@@ -168,9 +178,8 @@ void keyDown(int key, int, int) {
         break;
     case GLUT_KEY_UP:
         isKey = true;
-        playerVelocity = 1.0f;
+        objectVelocityY = 1.0f;
         isJumping = true;
-        //glutIdleFunc(spinDisplayJump);
         break;
     default:
         break;
@@ -192,5 +201,26 @@ void keyUp(int key, int, int) {
         break;
     default:
         break;
+    }
+}
+
+void loadTextures(const char *path, int cont) {
+
+    string a = "textures/";
+
+    //a += path;
+    //a += "/";
+
+
+    for (int i = 0; i < cont; i++)
+    {
+        //a += (char)i;
+        //a += ".png";
+
+        printf("%s",a.c_str());
+
+        const char* filename = a.c_str();
+        printf("%s", filename);
+        textureIDs[i] = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_MULTIPLY_ALPHA);
     }
 }
