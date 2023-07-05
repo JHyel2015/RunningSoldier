@@ -1,10 +1,16 @@
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+
 #include <GL/freeglut.h>
 #include <soil.h>
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <experimental/filesystem>
+#include <map>
+#include <list>
 #include "common.h"
 
 using namespace std;
+namespace fs = std::experimental::filesystem;
 
 int refreshRate = 300;
 
@@ -52,8 +58,10 @@ float objectAccelerationY = -0.25f;
 
 int cont = 10;
 
-GLuint textureIDs[5];   // Array of texture IDs
+GLuint textureIDs[5];   // Array of texture IDs}
+map<string, GLuint*> mapTextures;
 int currentTexture = 0;
+string currentAction = "stan";
 
 int main(int argc, char** argv)
 {
@@ -64,7 +72,7 @@ int main(int argc, char** argv)
     glutCreateWindow("Ejecricio Transformaciones de la vista");
 
     // loadTexture(&textureIDs);
-    loadTextures("standing", 5);
+    loadTextures("ninja/stan", 4);
     glutDisplayFunc(display3D);
     glutReshapeFunc(reshape);
 
@@ -108,7 +116,10 @@ void timer(int value) {
     }
 
     // Update the current texture index
-    currentTexture = (currentTexture + 1) % 5;
+    //currentTexture = (currentTexture + 1) % 4;
+    cout << sizeof(mapTextures[currentAction]) << endl;
+
+    currentTexture = (currentTexture + 1) % sizeof(mapTextures[currentAction]);
 
     glutPostRedisplay();
     glutTimerFunc(refreshRate, timer, 0);
@@ -207,20 +218,48 @@ void keyUp(int key, int, int) {
 void loadTextures(const char *path, int cont) {
 
     string a = "textures/";
+    string path2 = "";
 
-    //a += path;
-    //a += "/";
+    a += path;
+    a += "/";
+
+    string path3 = "./textures/ninja";
+    string dir = "";
+    int cont2 = 0;
+    int cont3 = 0;
+    for (const auto& entry : fs::directory_iterator(path3)) {
+
+        cout << entry.path() << endl;
+        dir = entry.path().filename().string();
+        cout << dir << endl;
+
+        cont2 = 0;
+        cont3 = 0;
+
+        for (const auto& entry2 : fs::directory_iterator(entry.path()))
+        {
+            cont2++;
+        }
 
 
-    for (int i = 0; i < cont; i++)
-    {
-        //a += (char)i;
-        //a += ".png";
+        GLuint* listTexturesIDs = new GLuint(cont2);
 
-        printf("%s",a.c_str());
+        for (const auto& entry2 : fs::directory_iterator(entry.path()))
+        {
+            const char* filename = entry2.path().string().c_str();
+            cout << filename << endl;
+            cout << cont3 << endl;
+            ++cont3;
+            listTexturesIDs[cont3] = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_MULTIPLY_ALPHA);
+        }
 
-        const char* filename = a.c_str();
-        printf("%s", filename);
-        textureIDs[i] = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_MULTIPLY_ALPHA);
+        mapTextures[dir] = listTexturesIDs;
+        cout << mapTextures[dir] << endl;
+
     }
+
+    for (const auto& pair : mapTextures) {
+        cout << pair.first << " " << endl;
+    }
+
 }
