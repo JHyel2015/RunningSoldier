@@ -116,10 +116,10 @@ void timer(int value) {
     }
 
     // Update the current texture index
-    //currentTexture = (currentTexture + 1) % 4;
-    cout << sizeof(mapTextures[currentAction]) << endl;
+    currentTexture = (currentTexture + 1) % 4;
+    // cout << sizeof(mapTextures[currentAction]) << endl;
 
-    currentTexture = (currentTexture + 1) % sizeof(mapTextures[currentAction]);
+    // currentTexture = (currentTexture + 1) % sizeof(mapTextures[currentAction]);
 
     glutPostRedisplay();
     glutTimerFunc(refreshRate, timer, 0);
@@ -227,6 +227,7 @@ void loadTextures(const char *path, int cont) {
     string dir = "";
     int cont2 = 0;
     int cont3 = 0;
+    /*
     for (const auto& entry : fs::directory_iterator(path3)) {
 
         cout << entry.path() << endl;
@@ -260,6 +261,17 @@ void loadTextures(const char *path, int cont) {
 
     for (const auto& pair : mapTextures) {
         cout << pair.first << " " << endl;
+    }
+    */
+
+    for (int i = 0; i < cont; i++)
+    {
+        path2 = a + to_string(i);
+        path2 += ".png";
+
+        const char* filename = path2.c_str();
+        printf("%s\n", filename);
+        textureIDs[i] = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_MULTIPLY_ALPHA);
     }
 
 }

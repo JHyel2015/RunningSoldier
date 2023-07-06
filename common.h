@@ -7,5 +7,3 @@ extern float camY;
 extern bool isKey;
 extern int currentTexture;
 extern GLuint textureIDs[5];
-extern string currentAction;
-extern map<string, GLuint*> mapTextures;
