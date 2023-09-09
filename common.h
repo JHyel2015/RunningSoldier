@@ -1,4 +1,4 @@
-#pragma once
+
 
 extern float posx;
 extern float posy;
