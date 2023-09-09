@@ -8,10 +8,13 @@ void dragFloor() {
 	glColor3f(0.92f, 0.88f, 0.77f);
 
 	glBegin(GL_POLYGON);
+	glTexCoord2f(-5.0f, -15.0f);
 	glVertex3f(-10.0f, -30.0f, 0.0f);
+	glTexCoord2f(5.0f, -15.0f);
 	glVertex3f(10.0f, -30.0f, 0.0f);
+	glTexCoord2f(5.0f, 0.0f);
 	glVertex3f(10.0f, 0.0f, 0.0f);
-	glVertex3f(0.0f, 1.0f, 0.0f);
+	glTexCoord2f(-5.0f, 0.0f);
 	glVertex3f(-10.0f, 0.0f, 0.0f);
 	glEnd();
 }
@@ -27,6 +30,8 @@ void dragFloors(int cont) {
 }
 
 void dragCloud(int size) {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	const float RAD = M_PI / 180;
 
 	float radio = size * 0.35f;
@@ -34,7 +39,12 @@ void dragCloud(int size) {
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++) {
 		float inRad = i * RAD;
-		glVertex2f((cos(inRad) * radio), sin(inRad) * radio);
+		float x = (cos(inRad) * radio);
+		float y = sin(inRad) * radio;
+		float s = (x) / (2.0f * radio) + 0.5f;
+		float t = (y) / (2.0f * radio) + 0.5f;
+		glTexCoord2f(s, t);
+		glVertex2f(x, y);
 	}
 	glEnd();
 
@@ -42,14 +52,24 @@ void dragCloud(int size) {
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++) {
 		float inRad = i * RAD;
-		glVertex2f(size * -0.35 + (cos(inRad) * radio), sin(inRad) * radio);
+		float x = (cos(inRad) * radio)+ size * -0.35;
+		float y = sin(inRad) * radio;
+		float s = (x) / (2.0f * radio) + 0.5f;
+		float t = (y) / (2.0f * radio) + 0.5f;
+		glTexCoord2f(s, t);
+		glVertex2f(x, y);
 	}
 	glEnd();
 
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++) {
 		float inRad = i * RAD;
-		glVertex2f(size * 0.35 + (cos(inRad) * radio), sin(inRad) * radio);
+		float x = (cos(inRad) * radio)+ size * 0.35;
+		float y = sin(inRad) * radio;
+		float s = (x) / (2.0f * radio) + 0.5f;
+		float t = (y) / (2.0f * radio) + 0.5f;
+		glTexCoord2f(s, t);
+		glVertex2f(x, y);
 	}
 	glEnd();
 }
